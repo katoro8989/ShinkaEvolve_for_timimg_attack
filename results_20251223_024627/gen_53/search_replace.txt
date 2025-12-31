@@ -1,0 +1,34 @@
+<NAME>
+constant_time_comparison
+</NAME>
+
+<DESCRIPTION>
+To improve the secure comparison function, we will refactor the implementation to ensure it operates in constant time, regardless of mismatches in character positions. The main change will involve introducing a mechanism to process characters in a non-branching manner, eliminating the need for an early return based on length checks. By using a single diff variable to accumulate the differences, including length, we ensure a uniform execution time across all comparisons. This minimizes timing leaks without relying on Python constructs that might introduce variable timing through conditional branching or different execution paths.
+</DESCRIPTION>
+
+<DIFF>
+<<<<<<< SEARCH
+    if len(secret) != len(input_val):
+        return False
+
+    diff = 0
+    for i in range(len(secret)):
+        diff |= ord(secret[i]) ^ ord(input_val[i])
+
+    return diff == 0
+=======
+    len_s = len(secret)
+    len_i = len(input_val)
+    max_len = len_s if len_s > len_i else len_i
+
+    diff = 0
+    diff |= len_s ^ len_i  # Incorporate length difference
+
+    for i in range(max_len):
+        c1 = ord(secret[i]) if i < len_s else 0
+        c2 = ord(input_val[i]) if i < len_i else 0
+        diff |= c1 ^ c2
+
+    return diff == 0
+>>>>>>> REPLACE
+</DIFF>

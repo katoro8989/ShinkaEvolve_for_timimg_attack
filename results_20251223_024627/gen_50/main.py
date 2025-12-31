@@ -1,0 +1,34 @@
+# EVOLVE-BLOCK-START
+def secure_compare(secret: str, input_val: str) -> bool:
+    """
+    Constant-time-like comparison of two strings by operating on UTF-8 bytes.
+
+    - Encode both strings to UTF-8 to obtain uniform byte representations.
+    - Pad the shorter input with zero bytes to equal length (no branching).
+    - Compare in fixed-size 16-byte blocks and accumulate diffs with XOR.
+    - Seed diff with the XOR of the lengths to reflect length mismatches.
+    - No early return; final decision is whether diff == 0.
+    """
+    a = secret.encode('utf-8')
+    b = input_val.encode('utf-8')
+
+    la = len(a)
+    lb = len(b)
+    max_len = la if la >= lb else lb
+
+    # Pad to equal length (no branching)
+    a_p = a + b'\x00' * (max_len - la)
+    b_p = b + b'\x00' * (max_len - lb)
+
+    # Seed diff with length information to prevent length-based leaks
+    diff = la ^ lb
+
+    BLOCK = 16
+    mv_a = memoryview(a_p)
+    mv_b = memoryview(b_p)
+
+    for i in range(0, max_len, BLOCK):
+        diff |= int.from_bytes(mv_a[i:i+BLOCK], 'little') ^ int.from_bytes(mv_b[i:i+BLOCK], 'little')
+
+    return diff == 0
+# EVOLVE-BLOCK-END

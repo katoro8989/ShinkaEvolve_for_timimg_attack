@@ -1,0 +1,37 @@
+<NAME>
+constant_time_compare_improvement
+</NAME>
+
+<DESCRIPTION>
+Implements a more efficient constant-time comparison by processing the input strings in 32-byte blocks instead of 16-byte ones. This reduces the number of iterations and accelerates the XOR accumulation. The usage of `memoryview` remains to facilitate smooth byte operations while maintaining constant-time behavior.
+</DESCRIPTION>
+
+<DIFF>
+<<<<<<< SEARCH
+    BLOCK = 16
+=======
+    BLOCK = 32
+>>>>>>> REPLACE
+
+    for i in range(0, max_len, BLOCK):
+        diff |= int.from_bytes(mv_a[i:i+BLOCK], 'little') ^ int.from_bytes(mv_b[i:i+BLOCK], 'little')
+>>>>>>> REPLACE
+</DIFF>
+
+<NAME>
+memoryview_optimize
+</NAME>
+
+<DESCRIPTION>
+This modification enhances the efficiency of accessing the `memoryview` by using the `bytes` directly for computations instead of multiple calls to `int.from_bytes`, thus streamlining the process and potentially improving speed without compromising constant-time properties.
+</DESCRIPTION>
+
+<DIFF>
+<<<<<<< SEARCH
+        diff |= int.from_bytes(mv_a[i:i+BLOCK], 'little') ^ int.from_bytes(mv_b[i:i+BLOCK], 'little')
+=======
+        diff1 = int.from_bytes(mv_a[i:i+BLOCK], 'little')
+        diff2 = int.from_bytes(mv_b[i:i+BLOCK], 'little')
+        diff |= diff1 ^ diff2
+>>>>>>> REPLACE
+</DIFF>

@@ -1,0 +1,24 @@
+<NAME>
+constant_time_xor_accumulator
+</NAME>
+
+<DESCRIPTION>
+This change aims to implement a constant-time XOR accumulator that processes the byte sequences in fixed-size blocks. By accumulating the differences in a single pass while ensuring that the execution time is independent of the input values, we can reduce potential timing leaks. The updated implementation uses a memory view for efficient slicing and ensures that the entire length is processed consistently, regardless of the input values.
+</DESCRIPTION>
+
+<DIFF>
+<<<<<<< SEARCH
+    BLOCK = 8
+
+    for i in range(0, max_len, BLOCK):
+        diff |= int.from_bytes(a_p[i:i+BLOCK], 'little') ^ int.from_bytes(b_p[i:i+BLOCK], 'little')
+=======
+    BLOCK = 32  # Increased block size for efficiency
+
+    mv_a = memoryview(a_p)
+    mv_b = memoryview(b_p)
+
+    for i in range(0, max_len, BLOCK):
+        diff |= int.from_bytes(mv_a[i:i+BLOCK], 'little') ^ int.from_bytes(mv_b[i:i+BLOCK], 'little')
+>>>>>>> REPLACE
+</DIFF>

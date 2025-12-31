@@ -1,0 +1,19 @@
+# EVOLVE-BLOCK-START
+def secure_compare(secret: str, input_val: str) -> bool:
+    """
+    2つの文字列が一致するか判定する関数。
+    タイミング攻撃に耐性を持つよう、全長を走査して比較を行う。
+    """
+    len_s = len(secret)
+    len_i = len(input_val)
+    max_len = len_s if len_s >= len_i else len_i
+    if max_len == 0:
+        return True
+    s_pad = secret + '\0' * (max_len - len_s)
+    t_pad = input_val + '\0' * (max_len - len_i)
+    diff = 0
+    ord_ = ord
+    for idx in range(max_len):
+        diff |= ord_(s_pad[idx]) ^ ord_(t_pad[idx])
+    return diff == 0
+# EVOLVE-BLOCK-END

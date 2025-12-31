@@ -1,0 +1,57 @@
+--- a/original.py
++++ b/original.py
+@@ -1,35 +1,31 @@
+ # EVOLVE-BLOCK-START
+ def secure_compare(secret: str, input_val: str) -> bool:
+     """
+-    Constant-time comparison between two strings using fixed-block XOR over UTF-8 bytes.
+-    Returns True if secret and input_val are exactly equal, otherwise False.
+-    This approach encodes to bytes, pads to equal length without branching, and
+-    processes in fixed-size blocks to avoid data-dependent timing.
++    Constant-time comparison by processing UTF-32-le code units in 4-byte blocks.
++    Pads the shorter string to equal length and XORs corresponding 32-bit blocks.
++    No early exits; returns True only if all blocks are identical and lengths match.
+     """
+-    b1 = secret.encode('utf-8')
+-    b2 = input_val.encode('utf-8')
++    a = secret.encode('utf-32-le')
++    b = input_val.encode('utf-32-le')
+ 
+-    len1 = len(b1)
+-    len2 = len(b2)
+-    max_len = len1 if len1 >= len2 else len2
++    len_a_units = len(a) // 4
++    len_b_units = len(b) // 4
+ 
+-    # Early return for completely empty case
+-    if max_len == 0:
+-        return True
++    max_units = max(len_a_units, len_b_units)
+ 
+-    # Pad with zeros to equal length (no branching inside the main loop)
+-    if max_len > len1:
+-        b1 = b1 + b'\x00' * (max_len - len1)
+-    if max_len > len2:
+-        b2 = b2 + b'\x00' * (max_len - len2)
++    # Pad to equal number of 4-byte units
++    if len_a_units < max_units:
++        a += b'\x00' * (4 * (max_units - len_a_units))
++    if len_b_units < max_units:
++        b += b'\x00' * (4 * (max_units - len_b_units))
+ 
+-    diff = len1 ^ len2
++    diff = (len_a_units ^ len_b_units)
+ 
+-    BLOCK = 16
+-    for i in range(0, max_len, BLOCK):
+-        chunk1 = b1[i:i+BLOCK]
+-        chunk2 = b2[i:i+BLOCK]
+-        diff |= int.from_bytes(chunk1, 'little') ^ int.from_bytes(chunk2, 'little')
++    for i in range(max_units):
++        base = i * 4
++        va = int.from_bytes(a[base:base+4], 'little')
++        vb = int.from_bytes(b[base:base+4], 'little')
++        diff |= (va ^ vb)
+ 
+     return diff == 0
+ # EVOLVE-BLOCK-END

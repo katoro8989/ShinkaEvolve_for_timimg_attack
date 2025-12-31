@@ -1,0 +1,22 @@
+<NAME>
+constant_time_secure_compare
+</NAME>
+
+<DESCRIPTION>
+The proposed changes implement a constant-time comparison for the `secure_compare` function. This is achieved by using a single integer variable to accumulate the results of character comparisons, ensuring that the function's execution time does not depend on the position of mismatches. This eliminates timing leaks that could be exploited by an attacker. The final comparison checks if the accumulated result equals zero, indicating that all characters matched.
+</DESCRIPTION>
+
+<DIFF>
+<<<<<<< SEARCH
+    for i in range(len(secret)):
+        # 脆弱ポイント: 不一致を見つけた瞬間に終了している
+        if secret[i] != input_val[i]:
+            return False
+=======
+    result = 0
+    for i in range(len(secret)):
+        result |= (ord(secret[i]) ^ ord(input_val[i]))
+
+    return result == 0
+>>>>>>> REPLACE
+</DIFF>

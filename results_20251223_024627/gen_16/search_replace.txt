@@ -1,0 +1,38 @@
+<NAME>
+constant_time_secure_compare
+</NAME>
+
+<DESCRIPTION>
+Refactor the `secure_compare` function to ensure it operates in constant time by eliminating any early returns and implementing a uniform comparison that scans the entire length of the strings, even if they're of different lengths. This involves using a local variable for the length of the strings and a padding mechanism to handle cases where one string is shorter than the other. I will use bitwise operations without branches to prevent timing attacks that can leak information based on the position of mismatches in the strings.
+</DESCRIPTION>
+
+<DIFF>
+<<<<<<< SEARCH
+    if len(secret) != len(input_val):
+        return False
+
+    n = len(secret)
+=======
+    len_s = len(secret)
+    len_i = len(input_val)
+    max_len = len_s if len_s > len_i else len_i
+
+    result = 0
+    for i in range(max_len):
+        c1 = ord(secret[i]) if i < len_s else 0
+        c2 = ord(input_val[i]) if i < len_i else 0
+>>>>>>> REPLACE
+    n = len(secret)
+    result = 0
+    for i in range(n):
+        result |= ord(secret[i]) ^ ord(input_val[i])
+    return result == 0
+# EVOLVE-BLOCK-END
+=======
+        result |= c1 ^ c2
+
+    return result == 0
+# EVOLVE-BLOCK-END
+```
+
+This change refactors the existing code to uniformly compare both strings, ensuring constant-time execution regardless of the input, thus providing better side-channel resistance while maintaining the intended functionality of the original implementation.

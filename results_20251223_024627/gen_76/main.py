@@ -1,0 +1,29 @@
+# EVOLVE-BLOCK-START
+def secure_compare(secret: str, input_val: str) -> bool:
+    """
+    2つの文字列が一致するか判定する関数。
+    タイミング攻撃に耐性を持つよう、全長を走査して比較を行う。
+    - Converts to UTF-8 bytes to obtain a uniform byte representation.
+    - Pads the shorter input with zero bytes to equal length.
+    - Compares in fixed-size blocks (16 bytes) and accumulates a diff with XOR.
+    - No early returns; output depends solely on the final diff.
+    """
+    a = secret.encode('utf-8')
+    b = input_val.encode('utf-8')
+
+    max_len = len(a) if len(a) >= len(b) else len(b)
+
+    # Pad to the same length with zeros (no branching)
+    a_p = a + b'\x00' * (max_len - len(a))
+    b_p = b + b'\x00' * (max_len - len(b))
+
+    diff = 0
+    BLOCK = 32
+    mv_a = memoryview(a_p)
+    mv_b = memoryview(b_p)
+
+    for i in range(0, max_len, BLOCK):
+        diff |= int.from_bytes(mv_a[i:i+BLOCK], 'little') ^ int.from_bytes(mv_b[i:i+BLOCK], 'little')
+
+    return diff == 0
+# EVOLVE-BLOCK-END

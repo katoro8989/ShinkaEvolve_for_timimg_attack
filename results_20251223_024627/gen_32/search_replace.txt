@@ -1,0 +1,35 @@
+<NAME>
+constant_time_secure_compare
+</NAME>
+
+<DESCRIPTION>
+The proposed modification enhances the `secure_compare` function by ensuring that it operates in constant time regardless of where mismatches occur. This is achieved by removing the early return based on length checks and utilizing a single loop that processes each character while also incorporating the length difference into the final comparison. This adjustment eliminates timing variations caused by string length discrepancies and character mismatches, thus improving the function's resistance to timing attacks.
+</DESCRIPTION>
+
+<DIFF>
+<<<<<<< SEARCH
+    if len(secret) != len(input_val):
+        return False
+=======
+    len_s = len(secret)
+    len_i = len(input_val)
+    max_len = max(len_s, len_i)
+>>>>>>> REPLACE
+    n = len(secret)
+    result = 0
+    for i in range(n):
+        result |= ord(secret[i]) ^ ord(input_val[i])
+    return result == 0
+=======
+    result = 0
+    for i in range(max_len):
+        a = secret[i] if i < len_s else '\0'
+        b = input_val[i] if i < len_i else '\0'
+        result |= ord(a) ^ ord(b)
+
+    # Include length difference to prevent timing leaks for strings with differing lengths
+    result |= (len_s ^ len_i)
+
+    return result == 0
+>>>>>>> REPLACE
+</DIFF>

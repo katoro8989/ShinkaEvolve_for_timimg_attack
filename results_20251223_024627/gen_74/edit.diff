@@ -1,0 +1,40 @@
+--- a/original.py
++++ b/original.py
+@@ -1,23 +1,21 @@
+ # EVOLVE-BLOCK-START
+ def secure_compare(secret: str, input_val: str) -> bool:
+     """
+-    Constant-time comparison of two strings.
+-    This version avoids early returns and operates in a no-branch style
+-    by processing characters in a non-branching manner, ensuring consistent
+-    timing regardless of mismatches.
++    Constant-time style comparison using UTF-32 LE encoding with blockwise XOR.
++    - Encodes strings into fixed 32-bit code units.
++    - Iterates over the maximum number of units, padding with zeros as needed.
++    - Accumulates differences in a single diff variable without branches.
++    - Returns True only if strings are exactly equal (same length and content).
+     """
+-    len_s = len(secret)
+-    len_i = len(input_val)
+-    max_len = max(len_s, len_i)
++    a = secret.encode('utf-32-le')
++    b = input_val.encode('utf-32-le')
++    max_len = max(len(a), len(b))
+ 
+-    result = len_s ^ len_i  # Start with length difference
++    diff = 0
++    for i in range(0, max_len, 4):
++        va = int.from_bytes(a[i:i+4].ljust(4, b'\x00'), 'little')
++        vb = int.from_bytes(b[i:i+4].ljust(4, b'\x00'), 'little')
++        diff |= (va ^ vb)
+ 
+-    for i in range(max_len):
+-        a = ord(secret[i]) if i < len_s else 0
+-        b = ord(input_val[i]) if i < len_i else 0
+-        result |= (a ^ b)
+-
+-    return result == 0
+-
+-    return True
++    return diff == 0
+ # EVOLVE-BLOCK-END

@@ -1,0 +1,53 @@
+--- a/original.py
++++ b/original.py
+@@ -1,21 +1,40 @@
+ # EVOLVE-BLOCK-START
+ def secure_compare(secret: str, input_val: str) -> bool:
+     """
+     Constant-time comparison between two strings.
+     Returns True if 'secret' and 'input_val' are equal; otherwise False.
+     The implementation avoids early returns and ensures uniform timing characteristics.
+     """
+-    len_s = len(secret)
+-    len_i = len(input_val)
++    # Encode to UTF-8 to get a deterministic byte representation
++    b1 = secret.encode('utf-8')
++    b2 = input_val.encode('utf-8')
+ 
+-    # Initialize the diff to capture length differences that provide a constant-time check
+-    diff = len_s ^ len_i
+-    max_len = max(len_s, len_i)
++    len1 = len(b1)
++    len2 = len(b2)
++    max_len = len1 if len1 >= len2 else len2
+ 
+-    for i in range(max_len):
+-        a = ord(secret[i]) if i < len_s else 0  # Use 0 as padding if out of bounds
+-        b = ord(input_val[i]) if i < len_i else 0
+-        diff |= a ^ b  # Accumulate differences
++    # Pad the shorter byte sequence to equal length (no branching in loop)
++    if max_len > len1:
++        b1 = b1 + b'\x00' * (max_len - len1)
++    if max_len > len2:
++        b2 = b2 + b'\x00' * (max_len - len2)
+ 
+-    return diff == 0  # Return True only if diff is 0
++    # Start with a diff that captures length difference
++    diff = len1 ^ len2
++
++    BLOCK = 8
++    i = 0
++    # Process in fixed 8-byte blocks
++    while i + BLOCK <= max_len:
++        v1 = int.from_bytes(b1[i:i+BLOCK], 'little')
++        v2 = int.from_bytes(b2[i:i+BLOCK], 'little')
++        diff |= (v1 ^ v2)
++        i += BLOCK
++
++    # Tail processing for remaining bytes
++    while i < max_len:
++        diff |= (b1[i] ^ b2[i])
++        i += 1
++
++    return diff == 0
+ # EVOLVE-BLOCK-END

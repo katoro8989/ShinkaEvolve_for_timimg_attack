@@ -1,0 +1,24 @@
+<NAME>
+constant_time_secure_compare
+</NAME>
+
+<DESCRIPTION>
+This refactor aims to ensure a true constant-time comparison by avoiding any dependencies on string lengths and eliminating early exits. The implementation will pad both strings to the maximum length and compare their character codes in a single pass. This approach guarantees that the execution time remains consistent regardless of input length or character matches, thus enhancing resistance to timing attacks.
+</DESCRIPTION>
+
+<DIFF>
+<<<<<<< SEARCH
+    diff = 0
+    for i in range(max_len):
+        ch_s = ord(secret[i]) if i < la else 0
+        ch_i = ord(input_val[i]) if i < lb else 0
+        diff |= (ch_s ^ ch_i)
+=======
+    # Initialize diff with length difference
+    diff = la ^ lb
+    for i in range(max_len):
+        ch_s = ord(secret[i]) if i < la else 0
+        ch_i = ord(input_val[i]) if i < lb else 0
+        diff |= (ch_s ^ ch_i)  # Aggregate differences
+>>>>>>> REPLACE
+</DIFF>

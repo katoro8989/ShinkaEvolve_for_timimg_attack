@@ -1,0 +1,30 @@
+<NAME>
+constant_time_secure_compare
+</NAME>
+
+<DESCRIPTION>
+The goal is to modify the `secure_compare` function to ensure it operates in constant time, thus eliminating timing discrepancies that could leak information about the input strings. Currently, the function returns quickly when a mismatch is found, which can be exploited. The new implementation will use a constant-time comparison technique that iterates through both strings completely regardless of mismatches, accumulating a comparison result that is checked only at the end. This guarantees that the execution time is consistent.
+</DESCRIPTION>
+
+<DIFF>
+<<<<<<< SEARCH
+    if len(secret) != len(input_val):
+        return False
+
+    for i in range(len(secret)):
+        # 脆弱ポイント: 不一致を見つけた瞬間に終了している
+        if secret[i] != input_val[i]:
+            return False
+
+    return True
+=======
+    if len(secret) != len(input_val):
+        return False
+
+    diff = 0
+    for i in range(len(secret)):
+        diff |= ord(secret[i]) ^ ord(input_val[i])
+
+    return diff == 0
+>>>>>>> REPLACE
+</DIFF>

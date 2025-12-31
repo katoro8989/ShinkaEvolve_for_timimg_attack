@@ -1,0 +1,31 @@
+<NAME>
+ct-block32
+</NAME>
+
+<DESCRIPTION>
+Propose increasing the per-iteration comparison block size from 16 bytes to 32 bytes in the constant-time comparison. This reduces the number of Python loop iterations, potentially lowering overhead while maintaining a strict constant-time behavior since all bytes are still processed and diff is accumulated without early exits. The change keeps the padding, memoryviews, and XOR-based diff accumulation intact, ensuring functional equivalence and security guarantees, but with improved throughput on typical workloads.
+</DESCRIPTION>
+
+<DIFF>
+<<<<<<< SEARCH
+    diff = 0
+    BLOCK = 16
+    mv_a = memoryview(a_p)
+    mv_b = memoryview(b_p)
+
+    for i in range(0, max_len, BLOCK):
+        diff |= int.from_bytes(mv_a[i:i+BLOCK], 'little') ^ int.from_bytes(mv_b[i:i+BLOCK], 'little')
+
+    return diff == 0
+=======
+    diff = 0
+    BLOCK = 32
+    mv_a = memoryview(a_p)
+    mv_b = memoryview(b_p)
+
+    for i in range(0, max_len, BLOCK):
+        diff |= int.from_bytes(mv_a[i:i+BLOCK], 'little') ^ int.from_bytes(mv_b[i:i+BLOCK], 'little')
+
+    return diff == 0
+>>>>>>> REPLACE
+</DIFF>

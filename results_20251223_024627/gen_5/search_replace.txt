@@ -1,0 +1,49 @@
+<NAME>
+ct_secure_compare
+</NAME>
+
+<DESCRIPTION>
+Introduce a constant-time comparison to eliminate timing leaks caused by early exit on mismatch. The function now:
+- Verifies length equality as a guard.
+- Performs a single pass accumulating XORs of corresponding characters without short-circuiting.
+- Uses a final comparison of the aggregated result to determine equality.
+Also caches the string length to avoid repeated len() calls inside the loop for a small performance gain.
+</DESCRIPTION>
+
+<DIFF>
+<<<<<<< SEARCH
+def secure_compare(secret: str, input_val: str) -> bool:
+    """
+    2つの文字列が一致するか判定する関数。
+    現在は典型的な「タイミング脆弱性」を含んでいる。
+    1文字でも違うと即座に False を返すため、
+    先頭で間違える場合と末尾で間違える場合で実行時間が異なる。
+    """
+    if len(secret) != len(input_val):
+        return False
+
+    for i in range(len(secret)):
+        # 脆弱ポイント: 不一致を見つけた瞬間に終了している
+        if secret[i] != input_val[i]:
+            return False
+
+    return True
+# EVOLVE-BLOCK-END
+=======
+def secure_compare(secret: str, input_val: str) -> bool:
+    """
+    2つの文字列が一致するか判定する関数。
+    現在は典型的な「タイミング脆弱性」を含んでいる。
+    1文字でも違うと即座に False を返すため、
+    先頭で間違える場合と末尾で間違える場合で実行時間が異なる。
+    """
+    if len(secret) != len(input_val):
+        return False
+
+    n = len(secret)
+    result = 0
+    for i in range(n):
+        result |= ord(secret[i]) ^ ord(input_val[i])
+    return result == 0
+>>>>>>> REPLACE
+</DIFF>

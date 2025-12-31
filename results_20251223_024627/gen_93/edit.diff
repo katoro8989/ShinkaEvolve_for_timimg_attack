@@ -1,0 +1,40 @@
+--- a/original.py
++++ b/original.py
+@@ -1,25 +1,25 @@
+ # EVOLVE-BLOCK-START
+ def secure_compare(secret: str, input_val: str) -> bool:
+     """
+-    Constant-time comparison of two strings.
+-    This version avoids early returns and operates in a no-branch style
+-    by traversing the maximum length of both strings and using a sentinel
+-    for out-of-range positions. Length difference is folded into the final diff
+-    to prevent timing leaks even when strings contain null characters.
++    Constant-time comparison of two strings using XOR.
++    This version processes the strings in fixed-size blocks to ensure
++    consistent timing regardless of mismatches.
+     Returns True only if both strings are exactly equal (same length and content).
+     """
+     len_s = len(secret)
+     len_i = len(input_val)
+     max_len = max(len_s, len_i)
+ 
+-    diff = 0
+-    for idx in range(max_len):
+-        a = secret[idx] if idx < len_s else '\0'
+-        b = input_val[idx] if idx < len_i else '\0'
+-        diff |= ord(a) ^ ord(b)
++    # Initialize diff with the length difference
++    diff = len_s ^ len_i
+ 
+-    # Include length difference to prevent timing leaks for strings with differing lengths
+-    diff |= (len_s ^ len_i)
++    # Pad the shorter string with null characters
++    padded_secret = secret.ljust(max_len, '\0')
++    padded_input = input_val.ljust(max_len, '\0')
++
++    # Process each character in a non-branching manner
++    for i in range(max_len):
++        diff |= ord(padded_secret[i]) ^ ord(padded_input[i])
+ 
+     return diff == 0
+ # EVOLVE-BLOCK-END

@@ -1,0 +1,22 @@
+<NAME>
+constant_time_secure_compare
+</NAME>
+
+<DESCRIPTION>
+This edit will transform the `secure_compare` function into a constant-time comparison by eliminating the short-circuiting behavior that causes timing discrepancies. The function will now compare the characters of the two strings in such a way that the full length of the strings is considered, regardless of any mismatches. Additionally, we will use integer representations of the character codes to ensure that we maintain a consistent execution time across all cases. The approach ensures no early returns and uses a final result check to determine equality.
+</DESCRIPTION>
+
+<DIFF>
+<<<<<<< SEARCH
+    result = 0
+    for i in range(len(secret)):
+        result |= (ord(secret[i]) ^ ord(input_val[i]))  # Compare characters using XOR
+=======
+    # Initialize the result to the length difference, will ensure padding for unequal lengths
+    result = len(secret) ^ len(input_val)
+    for i in range(len(secret)):
+        # Compare characters using XOR, constant time for each character
+        result |= (ord(secret[i]) ^ ord(input_val[i]))
+    # All characters match if result is 0
+>>>>>>> REPLACE
+</DIFF>

@@ -1,0 +1,52 @@
+--- a/original.py
++++ b/original.py
+@@ -1,23 +1,35 @@
+ # EVOLVE-BLOCK-START
+ def secure_compare(secret: str, input_val: str) -> bool:
+     """
+-    Constant-time comparison of two strings.
+-    This version avoids early returns and operates in a no-branch style
+-    by processing characters in a non-branching manner, ensuring consistent
+-    timing regardless of mismatches.
++    Constant-time string comparison using 64-bit blocks with a non-branching diff.
++    - Encode to UTF-8 bytes
++    - Pad to 8-byte boundary
++    - Seed diff with length XOR
++    - Iterate over 64-bit blocks and accumulate XOR differences
++    - Return True iff diff == 0
+     """
+-    len_s = len(secret)
+-    len_i = len(input_val)
+-    max_len = max(len_s, len_i)
++    s_bytes = secret.encode('utf-8')
++    t_bytes = input_val.encode('utf-8')
+ 
+-    result = len_s ^ len_i  # Start with length difference
++    la = len(s_bytes)
++    lb = len(t_bytes)
++    max_len = la if la >= lb else lb
+ 
+-    for i in range(max_len):
+-        a = ord(secret[i]) if i < len_s else 0
+-        b = ord(input_val[i]) if i < len_i else 0
+-        result |= (a ^ b)
++    # Seed with length difference to help resist length-based timing leaks
++    diff = la ^ lb
+ 
+-    return result == 0
++    # Pad to an 8-byte boundary for 64-bit block processing
++    padded = ((max_len + 7) // 8) * 8
++    s_pad = s_bytes + b'\x00' * (padded - la)
++    t_pad = t_bytes + b'\x00' * (padded - lb)
+ 
+-    return True
++    # Interpret as 64-bit blocks
++    w_s = memoryview(s_pad).cast('Q')
++    w_t = memoryview(t_pad).cast('Q')
++    blocks = padded // 8
++
++    for i in range(blocks):
++        diff |= (w_s[i] ^ w_t[i])
++
++    return diff == 0
+ # EVOLVE-BLOCK-END

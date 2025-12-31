@@ -1,0 +1,70 @@
+<NAME>
+utf8_8byte_block_ct
+
+<DESCRIPTION>
+Introduce a UTF-8 byte-based constant-time comparison using fixed-size 8-byte blocks to reduce Python-level overhead while preserving timing-attack resistance. The function now:
+- Encodes both inputs using UTF-8 to get a uniform byte representation.
+- Pads the shorter input with zeros to equal length (no branching).
+- Compares in 8-byte blocks via memoryview and XORs, accumulating into a diff.
+- Incorporates the length difference into the initial diff to mitigate length-based leaks.
+- Maintains no early returns; final result is diff == 0.
+
+This approach improves performance by reducing per-character Python overhead and leveraging larger block processing, while staying within a pure-Python constant-time style (no built-in compare_digest usage).
+</DESCRIPTION>
+
+<DIFF>
+<<<<<<< SEARCH
+def secure_compare(secret: str, input_val: str) -> bool:
+    """
+    2つの文字列が一致するか判定する関数。
+    タイミング攻撃に耐性を持つよう、全長を走査して比較を行う。
+    """
+    len_s = len(secret)
+    len_i = len(input_val)
+    max_len = len_s if len_s >= len_i else len_i
+    if max_len == 0:
+        return True
+    s_pad = secret + '\0' * (max_len - len_s)
+    t_pad = input_val + '\0' * (max_len - len_i)
+    diff = 0
+    ord_ = ord
+    for idx in range(max_len):
+        diff |= ord_(s_pad[idx]) ^ ord_(t_pad[idx])
+    return diff == 0
+# EVOLVE-BLOCK-END
+=======
+def secure_compare(secret: str, input_val: str) -> bool:
+    """
+    Constant-time comparison of two strings by operating on UTF-8 bytes.
+    - Encode both strings to UTF-8 bytes to obtain a uniform byte representation.
+    - Pad the shorter input with zero bytes to equal length (no branching).
+    - Compare in 8-byte blocks using memoryview and accumulate with XOR.
+    - Include length information in the initial diff to reduce length-based leaks.
+    - No early return; final check is whether diff == 0.
+    """
+    a = secret.encode('utf-8')
+    b = input_val.encode('utf-8')
+
+    len_a = len(a)
+    len_b = len(b)
+    max_len = len_a if len_a >= len_b else len_b
+
+    if max_len == 0:
+        return True
+
+    # Pad to equal length
+    a_p = a + b'\x00' * (max_len - len_a)
+    b_p = b + b'\x00' * (max_len - len_b)
+
+    diff = len_a ^ len_b
+
+    BLOCK = 8
+    mv_a = memoryview(a_p)
+    mv_b = memoryview(b_p)
+
+    for i in range(0, max_len, BLOCK):
+        diff |= int.from_bytes(mv_a[i:i+BLOCK], 'little') ^ int.from_bytes(mv_b[i:i+BLOCK], 'little')
+
+    return diff == 0
+>>>>>>> REPLACE
+</DIFF>

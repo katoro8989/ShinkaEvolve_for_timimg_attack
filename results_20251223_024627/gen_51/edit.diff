@@ -1,0 +1,52 @@
+--- a/original.py
++++ b/original.py
+@@ -1,24 +1,35 @@
+ # EVOLVE-BLOCK-START
+ def secure_compare(secret: str, input_val: str) -> bool:
+     """
+-    Constant-time comparison between two strings.
++    Constant-time comparison between two strings using fixed-block XOR over UTF-8 bytes.
+     Returns True if secret and input_val are exactly equal, otherwise False.
+-    The implementation avoids early returns and inspects all characters (padding
+-    shorter string with zeros) to ensure uniform timing characteristics.
++    This approach encodes to bytes, pads to equal length without branching, and
++    processes in fixed-size blocks to avoid data-dependent timing.
+     """
+-    len_s = len(secret)
+-    len_i = len(input_val)
++    b1 = secret.encode('utf-8')
++    b2 = input_val.encode('utf-8')
+ 
+-    # Start with a difference indicator that also captures length differences
+-    diff = len_s ^ len_i
++    len1 = len(b1)
++    len2 = len(b2)
++    max_len = len1 if len1 >= len2 else len2
+ 
+-    # Compare up to the maximum length of the two strings
+-    n = max(len_s, len_i)
+-    for idx in range(n):
+-        # Fetch character code points if within bounds; otherwise use 0 as padding
+-        a = ord(secret[idx]) if idx < len_s else 0
+-        b = ord(input_val[idx]) if idx < len_i else 0
+-        diff |= a ^ b  # accumulate any difference in a way that does not short-circuit
++    # Early return for completely empty case
++    if max_len == 0:
++        return True
++
++    # Pad with zeros to equal length (no branching inside the main loop)
++    if max_len > len1:
++        b1 = b1 + b'\x00' * (max_len - len1)
++    if max_len > len2:
++        b2 = b2 + b'\x00' * (max_len - len2)
++
++    diff = len1 ^ len2
++
++    BLOCK = 16
++    for i in range(0, max_len, BLOCK):
++        chunk1 = b1[i:i+BLOCK]
++        chunk2 = b2[i:i+BLOCK]
++        diff |= int.from_bytes(chunk1, 'little') ^ int.from_bytes(chunk2, 'little')
+ 
+     return diff == 0
+ # EVOLVE-BLOCK-END

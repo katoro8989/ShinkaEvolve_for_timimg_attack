@@ -1,0 +1,38 @@
+--- a/original.py
++++ b/original.py
+@@ -1,17 +1,27 @@
+ # EVOLVE-BLOCK-START
+ def secure_compare(secret: str, input_val: str) -> bool:
+     """
+-    2つの文字列が一致するか判定する関数。
+-    現在は典型的な「タイミング脆弱性」を含んでいる。
+-    1文字でも違うと即座に False を返すため、
+-    先頭で間違える場合と末尾で間違える場合で実行時間が異なる。
++    Constant-time style comparison of two strings.
++    - Converts to UTF-8 bytes to obtain a uniform byte representation.
++    - Pads the shorter input with zero bytes to equal length.
++    - Compares in fixed-size blocks (8 bytes) and accumulates a diff with XOR.
++    - No early returns; output depends solely on the final diff.
+     """
+-    if len(secret) != len(input_val):
+-        return False
++    a = secret.encode('utf-8')
++    b = input_val.encode('utf-8')
++
++    max_len = len(a) if len(a) >= len(b) else len(b)
++
++    # Pad to the same length with zeros (no branching)
++    a_p = a + b'\x00' * (max_len - len(a))
++    b_p = b + b'\x00' * (max_len - len(b))
+ 
+     diff = 0
+-    for i in range(len(secret)):
+-        diff |= ord(secret[i]) ^ ord(input_val[i])
++    to_int = int.from_bytes
++    BLOCK = 8
++
++    for i in range(0, max_len, BLOCK):
++        diff |= to_int(a_p[i:i+BLOCK], 'little') ^ to_int(b_p[i:i+BLOCK], 'little')
+ 
+     return diff == 0
+ # EVOLVE-BLOCK-END

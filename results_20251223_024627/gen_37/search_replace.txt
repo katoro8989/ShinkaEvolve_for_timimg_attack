@@ -1,0 +1,29 @@
+<NAME>
+constant_time_secure_compare
+</NAME>
+
+<DESCRIPTION>
+The proposed modification introduces a constant-time approach for comparing two strings by utilizing a fixed-length comparison and eliminating the reliance on the `ord()` function. This is achieved by using byte-level operations, which allows for faster execution and consistent timing across all cases, regardless of the position of mismatches. The new implementation ensures that both strings are processed in a manner that maintains constant-time characteristics and prevents timing attacks effectively.
+</DESCRIPTION>
+
+<DIFF>
+<<<<<<< SEARCH
+    max_len = len_s if len_s > len_i else len_i
+=======
+    max_len = max(len_s, len_i)
+>>>>>>> REPLACE
+    for idx in range(max_len):
+        a = secret[idx] if idx < len_s else '\0'
+        b = input_val[idx] if idx < len_i else '\0'
+        diff |= ord(a) ^ ord(b)
+=======
+    # Use bytes to compare characters in a constant-time manner
+    secret_bytes = secret.encode('utf-8')
+    input_bytes = input_val.encode('utf-8')
+
+    for idx in range(max_len):
+        a = secret_bytes[idx] if idx < len_s else 0
+        b = input_bytes[idx] if idx < len_i else 0
+        diff |= a ^ b
+>>>>>>> REPLACE
+</DIFF>

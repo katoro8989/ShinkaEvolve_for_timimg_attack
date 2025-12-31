@@ -1,0 +1,54 @@
+<NAME>
+constant_time_improvement
+</NAME>
+
+<DESCRIPTION>
+This edit enhances the constant-time comparison by implementing a more efficient block-wise processing mechanism. Specifically, it processes 8 characters at a time instead of 4, which reduces the number of iterations and overhead in Python. This change aims to improve performance while maintaining constant-time characteristics.
+</DESCRIPTION>
+
+<DIFF>
+<<<<<<< SEARCH
+    # Unrolled, no-branch loop to reduce Python overhead while preserving timing.
+    # Process 4 characters per iteration when possible.
+=======
+    # Unrolled, no-branch loop to reduce Python overhead while preserving timing.
+    # Process 8 characters per iteration when possible.
+>>>>>>> REPLACE
+    while idx + 3 < n:
+        a0 = ord(s[idx]) if idx < len_s else 0
+        b0 = ord(t[idx]) if idx < len_i else 0
+
+        a1 = ord(s[idx + 1]) if (idx + 1) < len_s else 0
+        b1 = ord(t[idx + 1]) if (idx + 1) < len_i else 0
+
+        a2 = ord(s[idx + 2]) if (idx + 2) < len_s else 0
+        b2 = ord(t[idx + 2]) if (idx + 2) < len_i else 0
+
+        a3 = ord(s[idx + 3]) if (idx + 3) < len_s else 0
+        b3 = ord(t[idx + 3]) if (idx + 3) < len_i else 0
+
+        a4 = ord(s[idx + 4]) if (idx + 4) < len_s else 0
+        b4 = ord(t[idx + 4]) if (idx + 4) < len_i else 0
+
+        a5 = ord(s[idx + 5]) if (idx + 5) < len_s else 0
+        b5 = ord(t[idx + 5]) if (idx + 5) < len_i else 0
+
+        a6 = ord(s[idx + 6]) if (idx + 6) < len_s else 0
+        b6 = ord(t[idx + 6]) if (idx + 6) < len_i else 0
+
+        a7 = ord(s[idx + 7]) if (idx + 7) < len_s else 0
+        b7 = ord(t[idx + 7]) if (idx + 7) < len_i else 0
+
+        diff |= a0 ^ b0
+        diff |= a1 ^ b1
+        diff |= a2 ^ b2
+        diff |= a3 ^ b3
+        diff |= a4 ^ b4
+        diff |= a5 ^ b5
+        diff |= a6 ^ b6
+        diff |= a7 ^ b7
+
+        idx += 8
+>>>>>>> REPLACE
+
+</DIFF>

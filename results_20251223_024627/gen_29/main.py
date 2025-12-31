@@ -1,0 +1,45 @@
+# EVOLVE-BLOCK-START
+def secure_compare(secret: str, input_val: str) -> bool:
+    """
+    Constant-time comparison between two strings.
+    Returns True if secret and input_val are exactly equal, otherwise False.
+    The implementation avoids early returns and inspects all characters (padding
+    shorter string with zeros) to ensure uniform timing characteristics.
+    """
+    len_s = len(secret)
+    len_i = len(input_val)
+
+    # Start with a difference indicator that also captures length differences
+    diff = len_s ^ len_i
+
+    # Compare up to the maximum length of the two strings
+    max_len = max(len_s, len_i)
+    idx = 0
+
+    # Unrolled loop to compare four characters at a time
+    while idx + 3 < max_len:
+        a0 = ord(secret[idx]) if idx < len_s else 0
+        b0 = ord(input_val[idx]) if idx < len_i else 0
+        a1 = ord(secret[idx + 1]) if (idx + 1) < len_s else 0
+        b1 = ord(input_val[idx + 1]) if (idx + 1) < len_i else 0
+        a2 = ord(secret[idx + 2]) if (idx + 2) < len_s else 0
+        b2 = ord(input_val[idx + 2]) if (idx + 2) < len_i else 0
+        a3 = ord(secret[idx + 3]) if (idx + 3) < len_s else 0
+        b3 = ord(input_val[idx + 3]) if (idx + 3) < len_i else 0
+
+        diff |= a0 ^ b0
+        diff |= a1 ^ b1
+        diff |= a2 ^ b2
+        diff |= a3 ^ b3
+
+        idx += 4
+
+    # Tail processing for remaining characters
+    while idx < max_len:
+        a = ord(secret[idx]) if idx < len_s else 0
+        b = ord(input_val[idx]) if idx < len_i else 0
+        diff |= a ^ b
+        idx += 1
+
+    return diff == 0
+# EVOLVE-BLOCK-END

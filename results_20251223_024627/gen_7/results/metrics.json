@@ -1,0 +1,18 @@
+{
+  "combined_score": 65.45079790543915,
+  "public": {
+    "score": 65.45079790543915,
+    "success": false
+  },
+  "private": {
+    "diff_ns": 92.31399999999985,
+    "avg_match": 2257.611,
+    "avg_first": 2327.9512,
+    "avg_last": 2235.6372,
+    "avg_mid": 2285.9482,
+    "coefficient_of_variation": 0.8828664829293783,
+    "stdev": 2010.0988427826821,
+    "max_diff": 92.31399999999985
+  },
+  "text_feedback": "[EVALUATION RESULTS]\nCorrectness: PASS\nAverage Execution Times:\n  - Match (full):     2257.61 ns\n  - Mismatch (first): 2327.95 ns\n  - Mismatch (last):  2235.64 ns\n  - Mismatch (mid):   2285.95 ns\n\nTiming Analysis:\n  - Max Time Difference: 92.31 ns (Lower is better)\n  - Coefficient of Variation: 0.8829 (Lower is better)\n  - Standard Deviation: 2010.10 ns\n\nScore Breakdown:\n  - Base Score (Correctness): 50.00\n  - Timing Bonus: 15.45\n  - CV Bonus: 0.00\n  - Total Score: 65.45"
+}

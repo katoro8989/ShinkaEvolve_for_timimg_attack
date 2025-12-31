@@ -1,0 +1,25 @@
+# EVOLVE-BLOCK-START
+def secure_compare(secret: str, input_val: str) -> bool:
+    """
+    Constant-time comparison of two strings.
+    This version avoids early returns and operates in a no-branch style
+    by traversing the maximum length of both strings and using a sentinel
+    for out-of-range positions. Length difference is folded into the final diff
+    to prevent timing leaks even when strings contain null characters.
+    Returns True only if both strings are exactly equal (same length and content).
+    """
+    len_s = len(secret)
+    len_i = len(input_val)
+    max_len = max(len_s, len_i)
+
+    diff = 0
+    for idx in range(max_len):
+        a = secret[idx] if idx < len_s else '\0'
+        b = input_val[idx] if idx < len_i else '\0'
+        diff |= ord(a) ^ ord(b)
+
+    # Include length difference to prevent timing leaks for strings with differing lengths
+    diff |= (len_s ^ len_i)
+
+    return diff == 0
+# EVOLVE-BLOCK-END

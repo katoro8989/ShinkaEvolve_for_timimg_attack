@@ -1,0 +1,63 @@
+<NAME>ct_unrolled_loop</NAME>
+<DESCRIPTION>Introduce a micro-optimization by unrolling the constant-time comparison loop to process 4 characters per iteration. This reduces Python loop overhead while preserving constant-time behavior (no early exits, padding with '\0' for out-of-bounds indices). This should improve throughput for typical inputs without compromising security assumptions.</DESCRIPTION>
+
+<DIFF>
+<<<<<<< SEARCH
+def secure_compare(secret: str, input_val: str) -> bool:
+    """
+    2つの文字列が一致するか判定する関数。
+    タイミング攻撃に耐性を持つよう、全長を走査して比較を行う。
+    """
+    max_len = max(len(secret), len(input_val))
+    diff = 0
+    for i in range(max_len):
+        c1 = secret[i] if i < len(secret) else '\0'
+        c2 = input_val[i] if i < len(input_val) else '\0'
+        diff |= ord(c1) ^ ord(c2)
+
+    return diff == 0
+=======
+def secure_compare(secret: str, input_val: str) -> bool:
+    """
+    2つの文字列が一致するか判定する関数。
+    タイミング攻撃に耐性を持つよう、全長を走査して比較を行う。
+    """
+    max_len = max(len(secret), len(input_val))
+    diff = 0
+    len_s = len(secret)
+    len_i = len(input_val)
+
+    i = 0
+    # Process 4 characters per iteration to reduce Python loop overhead
+    while i <= max_len - 4:
+        idx = i
+        c1 = secret[idx] if idx < len_s else '\0'
+        c2 = input_val[idx] if idx < len_i else '\0'
+        diff |= ord(c1) ^ ord(c2)
+
+        idx = i + 1
+        c1 = secret[idx] if idx < len_s else '\0'
+        c2 = input_val[idx] if idx < len_i else '\0'
+        diff |= ord(c1) ^ ord(c2)
+
+        idx = i + 2
+        c1 = secret[idx] if idx < len_s else '\0'
+        c2 = input_val[idx] if idx < len_i else '\0'
+        diff |= ord(c1) ^ ord(c2)
+
+        idx = i + 3
+        c1 = secret[idx] if idx < len_s else '\0'
+        c2 = input_val[idx] if idx < len_i else '\0'
+        diff |= ord(c1) ^ ord(c2)
+
+        i += 4
+
+    while i < max_len:
+        c1 = secret[i] if i < len_s else '\0'
+        c2 = input_val[i] if i < len_i else '\0'
+        diff |= ord(c1) ^ ord(c2)
+        i += 1
+
+    return diff == 0
+>>>>>>> REPLACE
+</DIFF>

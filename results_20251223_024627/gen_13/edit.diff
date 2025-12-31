@@ -1,0 +1,38 @@
+--- a/original.py
++++ b/original.py
+@@ -1,19 +1,24 @@
+ # EVOLVE-BLOCK-START
+ def secure_compare(secret: str, input_val: str) -> bool:
+     """
+-    2つの文字列が一致するか判定する関数。
+-    現在は典型的な「タイミング脆弱性」を含んでいる。
+-    1文字でも違うと即座に False を返すため、
+-    先頭で間違える場合と末尾で間違える場合で実行時間が異なる。
++    Constant-time comparison between two strings.
++    Returns True if secret and input_val are exactly equal, otherwise False.
++    The implementation avoids early returns and inspects all characters (padding
++    shorter string with zeros) to ensure uniform timing characteristics.
+     """
+-    if len(secret) != len(input_val):
+-        return False
++    len_s = len(secret)
++    len_i = len(input_val)
+ 
+-    result = 0
+-    for i in range(len(secret)):
+-        result |= (ord(secret[i]) ^ ord(input_val[i]))
++    # Start with a difference indicator that also captures length differences
++    diff = len_s ^ len_i
+ 
+-    return result == 0
++    # Compare up to the maximum length of the two strings
++    n = max(len_s, len_i)
++    for idx in range(n):
++        # Fetch character code points if within bounds; otherwise use 0 as padding
++        a = ord(secret[idx]) if idx < len_s else 0
++        b = ord(input_val[idx]) if idx < len_i else 0
++        diff |= a ^ b  # accumulate any difference in a way that does not short-circuit
+ 
+-    return True
++    return diff == 0
+ # EVOLVE-BLOCK-END

@@ -1,0 +1,18 @@
+[EVALUATION RESULTS]
+Correctness: PASS
+Average Execution Times:
+  - Match (full):     2957.21 ns
+  - Mismatch (first): 3050.37 ns
+  - Mismatch (last):  2963.13 ns
+  - Mismatch (mid):   3083.49 ns
+
+Timing Analysis:
+  - Max Time Difference: 126.28 ns (Lower is better)
+  - Coefficient of Variation: 0.5618 (Lower is better)
+  - Standard Deviation: 1693.06 ns
+
+Score Breakdown:
+  - Base Score (Correctness): 50.00
+  - Timing Bonus: 13.43
+  - CV Bonus: 0.00
+  - Total Score: 63.43

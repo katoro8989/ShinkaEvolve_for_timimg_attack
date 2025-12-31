@@ -1,0 +1,38 @@
+<NAME>constant_time_secure_compare</NAME>
+
+<DESCRIPTION>Refactor the comparison to be constant-time. Replace early-exit logic and length-based quick-fail with a single loop over the maximum length of the two strings, accumulating differences via XOR. Use a sentinel character for out-of-range indices so execution time is independent of where a mismatch occurs (beginning, middle, end) and independent of which string is longer. This avoids timing leaks without using library compare_digest. </DESCRIPTION>
+
+<DIFF>
+<<<<<<< SEARCH
+def secure_compare(secret: str, input_val: str) -> bool:
+    """
+    2つの文字列が一致するか判定する関数。
+    現在は典型的な「タイミング脆弱性」を含んでいる。
+    1文字でも違うと即座に False を返すため、
+    先頭で間違える場合と末尾で間違える場合で実行時間が異なる。
+    """
+    if len(secret) != len(input_val):
+        return False
+
+    for i in range(len(secret)):
+        # 脆弱ポイント: 不一致を見つけた瞬間に終了している
+        if secret[i] != input_val[i]:
+            return False
+
+    return True
+# EVOLVE-BLOCK-END
+=======
+def secure_compare(secret: str, input_val: str) -> bool:
+    """
+    2つの文字列が一致するか判定する関数。
+    タイミング攻撃に耐性を持つよう、全長を走査して比較を行う。
+    """
+    max_len = max(len(secret), len(input_val))
+    diff = 0
+    for i in range(max_len):
+        c1 = secret[i] if i < len(secret) else '\0'
+        c2 = input_val[i] if i < len(input_val) else '\0'
+        diff |= ord(c1) ^ ord(c2)
+    return diff == 0
+# EVOLVE-BLOCK-END
+>>>>>>> REPLACE

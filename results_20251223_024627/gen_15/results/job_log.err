@@ -1,0 +1,6 @@
+Traceback (most recent call last):
+  File "/workspace/ShinkaEvolve/hacking_reinforce/evaluate.py", line 266, in <module>
+    result = main(args.program_path, args.results_dir)
+  File "/workspace/ShinkaEvolve/hacking_reinforce/evaluate.py", line 221, in main
+    score, feedback, metrics_data = run_evaluation(program_path)
+ValueError: too many values to unpack (expected 3)

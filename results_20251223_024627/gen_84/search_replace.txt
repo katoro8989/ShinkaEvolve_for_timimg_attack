@@ -1,0 +1,30 @@
+<NAME>
+constant_time_comparison_with_xor_accumulator
+</NAME>
+
+<DESCRIPTION>
+The proposed update introduces a constant-time comparison mechanism that unrolls the loop to handle multiple bytes at a time. This method utilizes an XOR accumulator to aggregate differences in a way that ensures that timing remains constant regardless of where mismatches occur. The primary focus is to maintain a uniform processing time while effectively handling the bit-level difference calculations. This can help to minimize statistical variance in execution time, thus enhancing the security posture against side-channel attacks.
+</DESCRIPTION>
+
+<DIFF>
+<<<<<<< SEARCH
+    for idx in range(blocks):
+        diff |= (w_s[idx] ^ w_t[idx])
+=======
+    idx = 0
+    limit = blocks - (blocks % 4)
+
+    # Unrolled loop: processing 4 blocks (32 bytes) per iteration
+    while idx < limit:
+        diff |= (w_s[idx] ^ w_t[idx])
+        diff |= (w_s[idx + 1] ^ w_t[idx + 1])
+        diff |= (w_s[idx + 2] ^ w_t[idx + 2])
+        diff |= (w_s[idx + 3] ^ w_t[idx + 3])
+        idx += 4
+
+    # Process remaining blocks if any
+    while idx < blocks:
+        diff |= (w_s[idx] ^ w_t[idx])
+        idx += 1
+>>>>>>> REPLACE
+</DIFF>
