@@ -70,7 +70,7 @@ Using ShinkaEvolve, we evolve implementations that:
 
 1. Clone this repository:
 ```bash
-git clone <repository-url>
+git clone git@github.com:katoro8989/ShinkaEvolve_for_timimg_attack.git
 cd ShinkaEvolve_for_timimg_attack
 ```
 
@@ -135,6 +135,20 @@ Results are stored in the database specified in `run_shinka.py` (`pin_cracking_e
 ## References
 
 - [ShinkaEvolve](https://github.com/SakanaAI/ShinkaEvolve): The evolutionary framework used in this project
+- Lange, Robert Tjarko, Yuki Imajuku, and Edoardo Cetin. "Shinkaevolve: Towards open-ended and sample-efficient program evolution." arXiv preprint arXiv:2509.19349 (2025). [arXiv:2509.19349](https://arxiv.org/abs/2509.19349)
+
+## Citation
+
+If you use this work, please cite the ShinkaEvolve paper:
+
+```bibtex
+@article{lange2025shinka,
+  title={Shinkaevolve: Towards open-ended and sample-efficient program evolution},
+  author={Lange, Robert Tjarko and Imajuku, Yuki and Cetin, Edoardo},
+  journal={arXiv preprint arXiv:2509.19349},
+  year={2025}
+}
+```
 
 ## License
 
