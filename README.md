@@ -103,50 +103,6 @@ pip install git+https://github.com/SakanaAI/ShinkaEvolve.git
 
 ## Usage
 
-### ShinkaEvolve as a Python API
-
-ShinkaEvolve can be used as a Python API, similar to `import numpy`. After installing ShinkaEvolve, you can import and use its components directly in your Python code:
-
-```python
-from shinka.core import EvolutionRunner, EvolutionConfig
-from shinka.database import DatabaseConfig
-from shinka.launch import LocalJobConfig
-
-# Configure evolution parameters
-evo_config = EvolutionConfig(
-    init_program_path="initial.py",
-    num_generations=100,
-    max_parallel_jobs=8,
-    llm_models=["gpt-4o-mini"],
-    # ... other configuration options
-)
-
-# Configure job execution
-job_config = LocalJobConfig(
-    eval_program_path="evaluate.py",
-)
-
-# Configure database
-db_config = DatabaseConfig(
-    db_path="evolution.db",
-    archive_size=100,
-)
-
-# Create and run the evolution
-runner = EvolutionRunner(
-    evo_config=evo_config,
-    job_config=job_config,
-    db_config=db_config,
-)
-
-runner.run()
-```
-
-This project uses ShinkaEvolve programmatically in `run_shinka.py` rather than using the command-line `shinka_launch` tool. This approach provides:
-- **Full programmatic control**: Configure everything in Python code
-- **Customization**: Easy to modify parameters, add custom logic, or integrate with other tools
-- **Reproducibility**: All configuration is in code, making experiments easier to reproduce
-
 ### Running Evolution
 
 Start the evolution process:
