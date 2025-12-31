@@ -4,7 +4,7 @@ This repository uses [ShinkaEvolve](https://github.com/SakanaAI/ShinkaEvolve) to
 
 ## Overview
 
-Timing attacks are a class of side-channel attacks where an attacker exploits variations in execution time to infer sensitive information. This project demonstrates how evolutionary algorithms, guided by Large Language Models (LLMs), can automatically discover and refine constant-time comparison functions that eliminate timing vulnerabilities.
+Timing attacks are a class of side-channel attacks where an attacker exploits variations in execution time to infer sensitive information. This project demonstrates how evolutionary algorithms, guided by LLMs, can automatically discover and refine constant-time comparison functions that eliminate timing vulnerabilities.
 
 ### The Problem
 
@@ -64,7 +64,7 @@ Using ShinkaEvolve, we evolve implementations that:
 ### Prerequisites
 
 - Python 3.11+
-- [uv](https://github.com/astral-sh/uv) package manager
+- [uv](https://github.com/astral-sh/uv) package manager (recommended) or pip
 
 ### Setup
 
@@ -74,7 +74,9 @@ git clone <repository-url>
 cd ShinkaEvolve_for_timimg_attack
 ```
 
-2. Install ShinkaEvolve (see [ShinkaEvolve documentation](https://github.com/SakanaAI/ShinkaEvolve) for detailed setup):
+2. Install ShinkaEvolve as a Python package:
+
+**Using uv (recommended):**
 ```bash
 # Install uv if needed
 curl -LsSf https://astral.sh/uv/install.sh | sh
@@ -83,14 +85,67 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 uv venv --python 3.11
 source .venv/bin/activate  # On Windows: .venv\Scripts\activate
 
-# Install ShinkaEvolve
-cd <path-to-ShinkaEvolve>
-uv pip install -e .
+# Install ShinkaEvolve from GitHub
+uv pip install git+https://github.com/SakanaAI/ShinkaEvolve.git
 ```
 
-3. Configure your LLM API keys (OpenAI, Anthropic, etc.) as required by ShinkaEvolve.
+**Using pip:**
+```bash
+# Create virtual environment
+python -m venv .venv
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+
+# Install ShinkaEvolve from GitHub
+pip install git+https://github.com/SakanaAI/ShinkaEvolve.git
+```
+
+3. Configure your LLM API keys (OpenAI, Anthropic, etc.) as required by ShinkaEvolve. Set environment variables or configure API keys according to your LLM provider's requirements.
 
 ## Usage
+
+### ShinkaEvolve as a Python API
+
+ShinkaEvolve can be used as a Python API, similar to `import numpy`. After installing ShinkaEvolve, you can import and use its components directly in your Python code:
+
+```python
+from shinka.core import EvolutionRunner, EvolutionConfig
+from shinka.database import DatabaseConfig
+from shinka.launch import LocalJobConfig
+
+# Configure evolution parameters
+evo_config = EvolutionConfig(
+    init_program_path="initial.py",
+    num_generations=100,
+    max_parallel_jobs=8,
+    llm_models=["gpt-4o-mini"],
+    # ... other configuration options
+)
+
+# Configure job execution
+job_config = LocalJobConfig(
+    eval_program_path="evaluate.py",
+)
+
+# Configure database
+db_config = DatabaseConfig(
+    db_path="evolution.db",
+    archive_size=100,
+)
+
+# Create and run the evolution
+runner = EvolutionRunner(
+    evo_config=evo_config,
+    job_config=job_config,
+    db_config=db_config,
+)
+
+runner.run()
+```
+
+This project uses ShinkaEvolve programmatically in `run_shinka.py` rather than using the command-line `shinka_launch` tool. This approach provides:
+- **Full programmatic control**: Configure everything in Python code
+- **Customization**: Easy to modify parameters, add custom logic, or integrate with other tools
+- **Reproducibility**: All configuration is in code, making experiments easier to reproduce
 
 ### Running Evolution
 
@@ -121,50 +176,10 @@ Total score ranges from 0-100, with higher scores indicating better constant-tim
 
 Results are stored in the database specified in `run_shinka.py` (`pin_cracking_evolution.db` by default). You can monitor the evolution process and view generated solutions through ShinkaEvolve's WebUI or by querying the database directly.
 
-## How It Works
-
-1. **Initial Population**: Starts with the vulnerable implementation
-2. **Mutation**: LLMs generate variations, focusing on constant-time techniques
-3. **Evaluation**: Each candidate is tested for:
-   - Functional correctness
-   - Timing consistency across different mismatch positions
-4. **Selection**: Best-performing candidates advance to the next generation
-5. **Archive**: Successful solutions are stored for knowledge transfer
-6. **Iteration**: Process repeats, gradually improving timing characteristics
-
-## Expected Outcomes
-
-The evolution process should discover implementations that:
-- Use bitwise operations or accumulator patterns to avoid early returns
-- Process all characters regardless of match status
-- Maintain constant execution time independent of input patterns
-- Achieve scores above 90 (indicating strong constant-time properties)
-
-## Limitations
-
-- The evaluation uses statistical analysis over many iterations, but real-world timing attacks may exploit more subtle variations
-- The current setup focuses on string comparison; other operations may require different constant-time techniques
-- Standard library functions are intentionally excluded to encourage learning, but production code should use well-tested libraries when available
-
 ## References
 
 - [ShinkaEvolve](https://github.com/SakanaAI/ShinkaEvolve): The evolutionary framework used in this project
-- [Timing Attacks](https://en.wikipedia.org/wiki/Timing_attack): Overview of timing attack vulnerabilities
-- [Constant-Time Comparison](https://en.wikipedia.org/wiki/Timing_attack#Defense): Defense strategies against timing attacks
 
 ## License
 
-This project uses ShinkaEvolve, which is licensed under Apache-2.0. Please refer to the ShinkaEvolve repository for license details.
-
-## Citation
-
-If you use this work, please cite ShinkaEvolve:
-
-```bibtex
-@article{lange2025shinka,
-  title={ShinkaEvolve: Towards Open-Ended And Sample-Efficient Program Evolution},
-  author={Lange, Robert Tjarko and Imajuku, Yuki and Cetin, Edoardo},
-  journal={arXiv preprint arXiv:2509.19349},
-  year={2025}
-}
-```
+This project uses ShinkaEvolve, which is licensed under Apache-2.0. Please refer to the [ShinkaEvolve repository](https://github.com/SakanaAI/ShinkaEvolve) for license details.
